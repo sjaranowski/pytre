@@ -74,7 +74,7 @@ for val in results.itervalues():
 # print '** Sorting the data...'
 
 base_proc = float(min(results.keys()))
-base_csr = results[base_proc][1]['avg_csr']
+base_csr = results[base_proc][1]['max_csr'][0]
 
 for key, val in results.iteritems():
   val[2] = base_csr * key / base_proc
@@ -85,22 +85,7 @@ for key, val in results.iteritems():
 #  <#rdzeni>
 #  <#powtorzen>
 #  <skalowany CSR (idealny speedup)>
-#  <rzeczywisty CSR (usredniony ze wszystkich prob)>
-#  <min walltime (sposrod wszystkich prob)>
-#  <min walltime - nazwa pliku>
-#  <"najwieksze odchylenie (walltime) od sredniej";
-#   dokladniej: max |X - EX|, jak w poprzednim mailu>
-#  <odchylenie standardowe (walltime)>
-#
-#for key, val in results.iteritems():
-#  print key, len(val[0]), val[2], val[1]['avg_csr'], val[1]['min_wt'][0], \
-#      val[1]['min_wt'][1], val[1]['mxe_wt'], val[1]['dev_wt']       
-
-# Kolumny w kolejnosci:
-#  <#rdzeni>
-#  <#powtorzen>
-#  <skalowany CSR (idealny speedup)>
-#  <rzeczywisty CSR (usredniony ze wszystkich prob)>
+#  <rzeczywisty CSR (maks. ze wszystkich prob)>
 #  <min walltime (sposrod wszystkich prob)>
 #  <min walltime - nazwa pliku>
 #  <"najwieksze odchylenie (walltime) od sredniej";
@@ -108,7 +93,7 @@ for key, val in results.iteritems():
 #  <odchylenie standardowe (walltime)>
 
 for key, val in results.iteritems():
-  print key, len(val[0]), val[2], val[1]['avg_csr'], val[1]['min_wt'][0], \
+  print key, len(val[0]), val[2], val[1]['max_csr'][0], val[1]['min_wt'][0], \
       val[1]['min_wt'][1], val[1]['mxe_wt'], val[1]['dev_wt']  
 
 # print '* FINISHED'
