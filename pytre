@@ -1,0 +1,114 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import sys
+
+if len(sys.argv) <= 1:
+  print '! You must provide some files.'
+  exit(1)
+
+# print '* STARTING IN VERBOSE MODE'
+
+# print '* Passed arguments:', sys.argv[1:]
+
+# print '* Extracting data from files...'
+results = {}
+for fname in sys.argv[1:]:
+  try:
+    with open(fname, 'r') as f:
+      walltime = -1
+      # print '** Opened file:', fname
+      for line in f.readlines():
+        if line.find('Performance Timer') != -1:
+          num_procs = int ( line.split()[6] )
+          # print '*** Read # of processors:', num_procs
+          if ( not results.has_key(num_procs) ):
+            results[num_procs] = [[], {}, -1.0]
+        if line.find('Total Solve Wall Time') != -1:
+          walltime = float(line.split()[5])
+          # print '*** Read walltime:', walltime
+          #results[num_procs][0] += 1 ## HERE ADD EXCEPTION
+          results[num_procs][0].append((walltime, fname))
+      if walltime == -1:
+        print '! Couldn\'t find walltime. Not a \'.trn\' file?'
+        exit(1)
+  except IOError as (errno, strerror):
+    print "! I/O error({0}): {1}".format(errno, strerror)
+    print "!", fname
+    exit(1)
+  except ValueError:
+    print "! Could not convert data: probably wrong number format inside file."
+    exit(1)
+  except:
+    print "! Unexpected error:", sys.exc_info()[0]
+    raise
+
+# print '* Counting statistics...'
+from operator import itemgetter
+
+avg = lambda x: sum(x) / float(len(x))
+
+for val in results.itervalues():
+  walltimes = zip(*val[0])[0]
+  vavg = sum(walltimes) / float(len(val[0]))
+
+  val[1]['min_wt'] = min(val[0], key = itemgetter(0))
+  val[1]['max_wt'] = max(val[0], key = itemgetter(0))
+  val[1]['avg_wt'] = vavg
+
+  # NOTE: 86400 seconds = 24 hours.
+  val[1]['min_csr'] = (8.64e4 / val[1]['max_wt'][0], val[1]['max_wt'][1])
+  val[1]['max_csr'] = (8.64e4 / val[1]['min_wt'][0], val[1]['min_wt'][1])
+  val[1]['avg_csr'] =  8.64e4 / vavg
+
+  # Count some more statistics.
+  cen_one = map(lambda x : abs(x - vavg), walltimes)
+  cen_two = map(lambda x : x*x, cen_one )
+  std_dev = avg ( cen_two ) ** 0.5
+
+  val[1]['mxe_wt'] = max ( cen_one )
+  val[1]['mom_wt'] = avg ( cen_one )
+  val[1]['var_wt'] = avg ( cen_two )
+  val[1]['dev_wt'] = std_dev
+
+# print '** Sorting the data...'
+
+base_proc = float(min(results.keys()))
+base_csr = results[base_proc][1]['avg_csr']
+
+for key, val in results.iteritems():
+  val[2] = base_csr * key / base_proc
+
+# print '* Printing output...'
+
+# Kolumny w kolejnosci:
+#  <#rdzeni>
+#  <#powtorzen>
+#  <skalowany CSR (idealny speedup)>
+#  <rzeczywisty CSR (usredniony ze wszystkich prob)>
+#  <min walltime (sposrod wszystkich prob)>
+#  <min walltime - nazwa pliku>
+#  <"najwieksze odchylenie (walltime) od sredniej";
+#   dokladniej: max |X - EX|, jak w poprzednim mailu>
+#  <odchylenie standardowe (walltime)>
+#
+#for key, val in results.iteritems():
+#  print key, len(val[0]), val[2], val[1]['avg_csr'], val[1]['min_wt'][0], \
+#      val[1]['min_wt'][1], val[1]['mxe_wt'], val[1]['dev_wt']       
+
+# Kolumny w kolejnosci:
+#  <#rdzeni>
+#  <#powtorzen>
+#  <skalowany CSR (idealny speedup)>
+#  <rzeczywisty CSR (usredniony ze wszystkich prob)>
+#  <min walltime (sposrod wszystkich prob)>
+#  <min walltime - nazwa pliku>
+#  <"najwieksze odchylenie (walltime) od sredniej";
+#   dokladniej: max |X - EX|, jak w poprzednim mailu>
+#  <odchylenie standardowe (walltime)>
+
+for key, val in results.iteritems():
+  print key, len(val[0]), val[2], val[1]['avg_csr'], val[1]['min_wt'][0], \
+      val[1]['min_wt'][1], val[1]['mxe_wt'], val[1]['dev_wt']  
+
+# print '* FINISHED'
