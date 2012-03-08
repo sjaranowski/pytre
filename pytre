@@ -29,9 +29,33 @@ class NoTrnFilesError(Error):
   def __init__(self, msg):
     self.msg = msg
 
+# print '* STARTING IN VERBOSE MODE'
+
 import sys
 
-# print '* STARTING IN VERBOSE MODE'
+if '-h' in sys.argv[1:] or len(sys.argv) <= 1:
+  print("usage: pytre [-h] [file]...")
+  print
+  print("extracts data (see output) from '*.trn' files")
+  print
+  print("arguments:")
+  print("files    e.g. 'one.trn two.trn three*.trn'")
+  print
+  print("optional arguments:")
+  print("-h       show this help message and exit")
+  print("         ('-h' can follow list of files or appear anywhere inside it)")
+  print
+  print("output:")
+  print("table with following columns (left to right):")
+  print("  <number of cores>")
+  print("  <number of repeats>")
+  print("  <scaled CSR (perfect speedup)>")
+  print("  <maximum CSR (best rate through all of the experiments)>")
+  print("  <maximum absolute deviation (of CSR)>")
+  print("  <naive standard deviation (of CSR)>")
+  print("  <minimum walltime (can be counted from maximum CSR)>")
+  print("  <file that hit the best result>")
+  exit(0)
 
 # print '* Passed arguments:', sys.argv[1:]
 num_files = 0
@@ -59,8 +83,9 @@ for fname in sys.argv[1:]:
       elif walltime == -1:
         raise TrnFileInformationMissingError("Total Solve Walltime", fname)
   except IOError as (errno, strerror):
-    print "ERROR: I/O error({0}): {1}".format(errno, strerror)
-    print "ERROR: Could not open file: '{0}'".format(fname)
+    print("WARNING: I/O error({0}): {1}").format(errno, strerror)
+    print("WARNING: Could not open file: '{0}'").format(fname)
+    print("WARNING: Omitting file '{0}'").format(fname)
   except ValueError:
     print("WARNING: Could not convert data")
     print("WARNING: HINT: probably wrong number format inside file")
