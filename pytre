@@ -58,11 +58,6 @@ for fname in sys.argv[1:]:
         raise TrnFileInformationMissingError("number of processors", fname)
       elif walltime == -1:
         raise TrnFileInformationMissingError("Total Solve Walltime", fname)
-      else:
-        num_files = num_files + 1
-        if ( not results.has_key(num_procs) ):
-          results[num_procs] = [[], {}, -1.0]
-        results[num_procs][0].append((walltime, fname))
   except IOError as (errno, strerror):
     print "ERROR: I/O error({0}): {1}".format(errno, strerror)
     print "ERROR: Could not open file: '{0}'".format(fname)
@@ -78,6 +73,11 @@ for fname in sys.argv[1:]:
   except:
     print "ERROR: Unexpected error:", sys.exc_info()[0]
     raise
+  else:
+    num_files = num_files + 1
+    if (not results.has_key(num_procs)):
+      results[num_procs] = [[], {}, -1.0]
+    results[num_procs][0].append((walltime, fname))
 
 # See if there were some correct '*.trn' files
 try:
