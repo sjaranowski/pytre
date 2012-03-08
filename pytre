@@ -1,6 +1,40 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+class Error(Exception):
+  """Base class for exceptions in module."""
+
+  pass
+
+class TrnFileInformationMissingError(Error):
+  """Exception raised when a '*.trn' file seems to be invalid, i.e. some
+  needed information is not found inside this file
+
+  Attributes:
+      what     -- what information is missing
+      filename -- the name of damaged file
+  """
+
+  def __init__(self, what, filename):
+    self.what = what
+    self.filename = filename
+
+class NoTrnFilesError(Error):
+  """ Exception raised, when there are no correct '*.trn' files in the
+  input arguments.
+
+  Attributes
+      msg -- explanation
+  """
+
+  pass
+
+class TrnFileReadError(Exception):
+  def __init__(self, value):
+    self.value = value
+  def __str__(self):
+    return repr(self.value)
+
 import sys
 
 if len(sys.argv) <= 1:
@@ -16,6 +50,7 @@ results = {}
 for fname in sys.argv[1:]:
   try:
     with open(fname, 'r') as f:
+      num_procs = -1
       walltime = -1
       # print '** Opened file:', fname
       for line in f.readlines():
@@ -30,17 +65,21 @@ for fname in sys.argv[1:]:
           #results[num_procs][0] += 1 ## HERE ADD EXCEPTION
           results[num_procs][0].append((walltime, fname))
       if walltime == -1:
-        print '! Couldn\'t find walltime. Not a \'.trn\' file?'
-        exit(1)
+        raise TrnFileReadError("cos1")
   except IOError as (errno, strerror):
-    print "! I/O error({0}): {1}".format(errno, strerror)
-    print "!", fname
-    exit(1)
+    print "ERROR: I/O error({0}): {1}".format(errno, strerror)
+    print "ERROR: Could not open filename: {0}".format(fname)
+    #raise
   except ValueError:
-    print "! Could not convert data: probably wrong number format inside file."
-    exit(1)
+    print("WARNING: Could not convert data")
+    print("WARNING: HINT: probably wrong number format inside file")
+  except TrnFileReadError:
+    print("WARNING: Could not find Total Solve Walltime"),
+    print("WARNING: inside file '{0}'").format(fname)
+    print("WARNING: Omitting file '{0}'").format(fname)
+    print("WARNING: HINT: Sure a *.trn file?")
   except:
-    print "! Unexpected error:", sys.exc_info()[0]
+    print "ERROR: Unexpected error:", sys.exc_info()[0]
     raise
 
 # print '* Counting statistics...'
