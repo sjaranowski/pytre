@@ -94,16 +94,14 @@ for key, val in results.iteritems():
 
 # print '* Printing output...'
 
-# Kolumny w kolejnosci:
-#  <#rdzeni>
-#  <#powtorzen>
-#  <skalowany CSR (idealny speedup)>
-#  <rzeczywisty CSR (maks. ze wszystkich prob)>
-#  <min walltime (sposrod wszystkich prob)>
-#  <min walltime - nazwa pliku>
-#  <"najwieksze odchylenie (walltime) od sredniej";
-#   dokladniej: max |X - EX|, jak w poprzednim mailu>
-#  <odchylenie standardowe (walltime)>
+#  <number of cores>
+#  <number of repeats>
+#  <scaled CSR (perfect speedup)>
+#  <maximum CSR (best rate through all of the experiments)>
+#  <maximum absolute deviation (of CSR)>
+#  <naive standard deviation (of CSR)>
+#  <minimum walltime (can be counted from maximum CSR)>
+#  <file that hit the best result>
 
 for key, val in results.iteritems():
   print '{0:5d}\t{1:3d}\t{2:10.3f}\t{3:10.3f}\t{4:8.3f}\t{5:8.3f}\t{6:10.3f}\t{7}'.format(key, len(val[0]), val[2], val[1]['max_csr'][0], val[1]['mxe_csr'], val[1]['std_csr'], val[1]['min_wt'][0], val[1]['max_csr'][1])
