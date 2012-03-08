@@ -52,6 +52,10 @@ for val in results.itervalues():
   walltimes = zip(*val[0])[0]
   vavg = sum(walltimes) / float(len(val[0]))
 
+  csrs = map(lambda x: 8.64e4 / x, walltimes)
+  cavg = sum(csrs) / float(len(val[0]))
+  #print cavg, csrs, val[0]
+
   val[1]['min_wt'] = min(val[0], key = itemgetter(0))
   val[1]['max_wt'] = max(val[0], key = itemgetter(0))
   val[1]['avg_wt'] = vavg
@@ -70,6 +74,15 @@ for val in results.itervalues():
   val[1]['mom_wt'] = avg ( cen_one )
   val[1]['var_wt'] = avg ( cen_two )
   val[1]['dev_wt'] = std_dev
+
+  ymey   = map(lambda y : abs(y - cavg), csrs)
+  ymeysq = map(lambda y : y*y, ymey )
+  std    = avg(ymeysq) ** 0.5
+
+  val[1]['mxe_csr'] = max(ymey)
+  val[1]['mom_csr'] = avg(ymey)
+  val[1]['var_csr'] = avg(ymeysq)
+  val[1]['std_csr'] = val[1]['var_csr'] ** 0.5
 
 # print '** Sorting the data...'
 
@@ -93,7 +106,6 @@ for key, val in results.iteritems():
 #  <odchylenie standardowe (walltime)>
 
 for key, val in results.iteritems():
-  print key, len(val[0]), val[2], val[1]['max_csr'][0], val[1]['min_wt'][0], \
-      val[1]['min_wt'][1], val[1]['mxe_wt'], val[1]['dev_wt']  
+  print '{0:5d}\t{1:3d}\t{2:10.3f}\t{3:10.3f}\t{4:8.3f}\t{5:8.3f}\t{6:10.3f}\t{7}'.format(key, len(val[0]), val[2], val[1]['max_csr'][0], val[1]['mxe_csr'], val[1]['std_csr'], val[1]['min_wt'][0], val[1]['max_csr'][1])
 
 # print '* FINISHED'
