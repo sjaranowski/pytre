@@ -3,7 +3,6 @@
 
 class Error(Exception):
   """Base class for exceptions in module."""
-
   pass
 
 class TrnFileInformationMissingError(Error):
@@ -27,23 +26,15 @@ class NoTrnFilesError(Error):
       msg -- explanation
   """
 
-  pass
-
-class TrnFileReadError(Exception):
-  def __init__(self, value):
-    self.value = value
-  def __str__(self):
-    return repr(self.value)
+  def __init__(self, msg):
+    self.msg = msg
 
 import sys
-
-if len(sys.argv) <= 1:
-  print '! You must provide some files.'
-  exit(1)
 
 # print '* STARTING IN VERBOSE MODE'
 
 # print '* Passed arguments:', sys.argv[1:]
+num_files = 0
 
 # print '* Extracting data from files...'
 results = {}
@@ -62,25 +53,40 @@ for fname in sys.argv[1:]:
         if line.find('Total Solve Wall Time') != -1:
           walltime = float(line.split()[5])
           # print '*** Read walltime:', walltime
-          #results[num_procs][0] += 1 ## HERE ADD EXCEPTION
-          results[num_procs][0].append((walltime, fname))
-      if walltime == -1:
-        raise TrnFileReadError("cos1")
+      # Throw some exceptions in case you didn't find the data
+      if num_procs == -1:
+        raise TrnFileInformationMissingError("number of processors", fname)
+      elif walltime == -1:
+        raise TrnFileInformationMissingError("Total Solve Walltime", fname)
+      else:
+        num_files = num_files + 1
+        if ( not results.has_key(num_procs) ):
+          results[num_procs] = [[], {}, -1.0]
+        results[num_procs][0].append((walltime, fname))
   except IOError as (errno, strerror):
     print "ERROR: I/O error({0}): {1}".format(errno, strerror)
-    print "ERROR: Could not open filename: {0}".format(fname)
-    #raise
+    print "ERROR: Could not open file: '{0}'".format(fname)
   except ValueError:
     print("WARNING: Could not convert data")
     print("WARNING: HINT: probably wrong number format inside file")
-  except TrnFileReadError:
-    print("WARNING: Could not find Total Solve Walltime"),
-    print("WARNING: inside file '{0}'").format(fname)
-    print("WARNING: Omitting file '{0}'").format(fname)
-    print("WARNING: HINT: Sure a *.trn file?")
+  except TrnFileInformationMissingError as errinfo:
+    print("WARNING: Could not find"),
+    print errinfo.what,
+    print("inside file '{0}'").format(errinfo.filename)
+    print("WARNING: Omitting file '{0}'").format(errinfo.filename)
+    print("WARNING: HINT: Sure a '*.trn' file?")
   except:
     print "ERROR: Unexpected error:", sys.exc_info()[0]
     raise
+
+# See if there were some correct '*.trn' files
+try:
+  if num_files == 0:
+    raise NoTrnFilesError("You must provide some correct '*.trn' files")
+except NoTrnFilesError as errnofiles:
+  print("ERROR: {0}").format(errnofiles.msg)
+  print("ERROR: No files = nothing to do. Exiting")
+  exit(1)
 
 # print '* Counting statistics...'
 from operator import itemgetter
@@ -124,7 +130,6 @@ for val in results.itervalues():
   val[1]['std_csr'] = val[1]['var_csr'] ** 0.5
 
 # print '** Sorting the data...'
-
 base_proc = float(min(results.keys()))
 base_csr = results[base_proc][1]['max_csr'][0]
 
