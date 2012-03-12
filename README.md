@@ -13,12 +13,11 @@ pytre [-h] file1 [file2...]
 
 ## OUTPUT
 Description of output (table with following columns, left to right):
- 1. number of cores
- 2. number of repeats
- 3. scaled CSR (perfect speedup)
- 4. maximum CSR (best rate through all of the experiments)
- 5. maximum absolute deviation (of CSR)
- 6. naive standard deviation (of CSR)
- 7. minimum walltime (can be counted from maximum CSR)
- 8. file that hit the best result
-
+1. number of cores
+2. number of repeats
+3. scaled CSR (perfect speedup)
+4. maximum CSR (best rate through all of the experiments)
+5. maximum absolute deviation (of CSR)
+6. naive standard deviation (of CSR)
+7. minimum walltime (can be counted from maximum CSR)
+8. file that hit the best result
