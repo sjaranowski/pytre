@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 class Error(Exception):
@@ -176,3 +176,4 @@ for key, val in results.iteritems():
   print '{0:5d}\t{1:3d}\t{2:10.3f}\t{3:10.3f}\t{4:8.3f}\t{5:8.3f}\t{6:10.3f}\t{7}'.format(key, len(val[0]), val[2], val[1]['max_csr'][0], val[1]['mxe_csr'], val[1]['std_csr'], val[1]['min_wt'][0], val[1]['max_csr'][1])
 
 # print '* FINISHED'
+
